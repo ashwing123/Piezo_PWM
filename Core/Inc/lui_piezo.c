@@ -50,7 +50,7 @@ void MX_TIM3_Init(void)
     Error_Handler();
   }
   sConfigOC.OCMode = TIM_OCMODE_PWM1;
-  sConfigOC.Pulse = 500;
+  sConfigOC.Pulse = 0;
   sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
   sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
   if (HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_3) != HAL_OK)
@@ -119,7 +119,7 @@ void pause_pwm(int duration_in_ms) {
  * purpose: plays a frequency, for a duration that corresponds to the beat and the tempo
  * input: the beat length, the frequency, the beats per second (tempo)
  */
-void play_frequency(int note_beat_length, float frequency, float beats_per_sec) {
+void play_frequency(float note_beat_length, float frequency, float beats_per_sec) {
 	int note_duration_ms = (note_beat_length/beats_per_sec)*1000;
 	if (frequency == 0) {
 		pause_pwm(note_duration_ms);
@@ -130,18 +130,18 @@ void play_frequency(int note_beat_length, float frequency, float beats_per_sec) 
 		__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, arr_val / 2);
 		//delaying so the note holds
 		HAL_Delay(note_duration_ms);
+	}
+}
+void play_frequency_array(float beats[], float frequencies[], int tempo, int song_len) {
+	float beats_per_sec = tempo/60;
+	for (int i = 0; i < song_len; i++) {
+		play_frequency(beats[i], frequencies[i], beats_per_sec);
 		//small pause after note
 		pause_pwm((int) (50/(beats_per_sec)));
 	}
 }
-void play_frequency_array(int beats[], float frequencies[], int tempo, int song_len) {
-	float beats_per_sec = tempo/60;
-	for (int i = 0; i < song_len; i++) {
-		play_frequency(beats[i], frequencies[i], beats_per_sec);
-	}
-}
 
-void play_tune(int beats[], char *song_notes, int tempo) {
+void play_tune(float beats[], char *song_notes, int tempo) {
 	int note_num = 0;
 	float freq_arr[100];
 	char *context = NULL;
@@ -155,5 +155,12 @@ void play_tune(int beats[], char *song_notes, int tempo) {
 	piezo_init();
 	HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_3);
 	play_frequency_array(beats, freq_arr, tempo, note_num);
+}
+
+void play_frequency_array_no_pause(float beats[], float frequencies[], int tempo, int song_len){
+	float beats_per_sec = tempo/60;
+	for (int i = 0; i < song_len; i++) {
+		play_frequency(beats[i], frequencies[i], beats_per_sec);
+	}
 }
 

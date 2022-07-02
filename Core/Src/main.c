@@ -135,14 +135,16 @@ int main(void)
   /* USER CODE BEGIN 2 */
   piezo_init();
 
-  int beat_dur[] = {1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 2};
-  char twinkle_twinkle_notes[] = "C4 C4 G4 G4 A4 A4 G4 F4 F4 E4 E4 D4 D4 C4 G4 G4 F4 F4 E4 E4 D4 G4 G4 F4 F4 E4 E4 D4 C4 C4 G4 G4 A4 A4 G4 F4 F4 E4 E4 D4 D4 C4 ";
+  //int beat_dur[] = {1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 2};
+  //char twinkle_twinkle_notes[] = "C4 C4 G4 G4 A4 A4 G4 F4 F4 E4 E4 D4 D4 C4 G4 G4 F4 F4 E4 E4 D4 G4 G4 F4 F4 E4 E4 D4 C4 C4 G4 G4 A4 A4 G4 F4 F4 E4 E4 D4 D4 C4 ";
+  char xfiles_notes[] = "A3 C4 E4 F4 0 A4 E4 D4 E4 G4 E4";
+  float xfiles_beats[] = {0.5, 0.5, 0.5, 1, 1, 1, 1, 1, 1, 1, 2};
   /* USER CODE END 2 */
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	play_tune(beat_dur, twinkle_twinkle_notes, 120);
+	play_tune(xfiles_beats, xfiles_notes, 180);
 	break;
     /* USER CODE END WHILE */
   }
