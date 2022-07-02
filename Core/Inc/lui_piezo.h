@@ -17,7 +17,7 @@ void play_frequency_array(float beats[], float frequencies[], int tempo, int son
 void play_tune(float beats[], char *song_notes, int tempo);
 
 //solely notification purposes
-void play_frequency_no_pause
+void play_freqs_no_pause(float beats[], float frequencies[], int tempo, int song_len);
 
 
 #endif /* LUI_PIEZO_H_ */

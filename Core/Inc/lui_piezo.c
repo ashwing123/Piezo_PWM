@@ -136,7 +136,6 @@ void play_frequency_array(float beats[], float frequencies[], int tempo, int son
 	float beats_per_sec = tempo/60;
 	for (int i = 0; i < song_len; i++) {
 		play_frequency(beats[i], frequencies[i], beats_per_sec);
-		//small pause after note
 		pause_pwm((int) (50/(beats_per_sec)));
 	}
 }
@@ -157,10 +156,17 @@ void play_tune(float beats[], char *song_notes, int tempo) {
 	play_frequency_array(beats, freq_arr, tempo, note_num);
 }
 
-void play_frequency_array_no_pause(float beats[], float frequencies[], int tempo, int song_len){
+void stop_pwm(void) {
+	__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, 0);
+}
+void play_freqs_no_pause(float beats[], float frequencies[], int tempo, int song_len) {
+	piezo_init();
+	HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_3);
 	float beats_per_sec = tempo/60;
 	for (int i = 0; i < song_len; i++) {
 		play_frequency(beats[i], frequencies[i], beats_per_sec);
 	}
+	stop_pwm();
+
 }
 
