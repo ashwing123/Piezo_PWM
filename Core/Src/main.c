@@ -35,8 +35,8 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define CLOCKFREQ 1000000
-#define NUM_NOTES 12
+//#define CLOCKFREQ 1000000
+//#define NUM_NOTES 12
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -56,7 +56,7 @@ OSPI_HandleTypeDef hospi2;
 
 SPI_HandleTypeDef hspi2;
 
-TIM_HandleTypeDef htim3;
+//TIM_HandleTypeDef htim3;
 
 UART_HandleTypeDef huart4;
 UART_HandleTypeDef huart1;
@@ -81,106 +81,14 @@ static void MX_UART4_Init(void);
 static void MX_USART1_UART_Init(void);
 static void MX_UCPD1_Init(void);
 static void MX_USB_OTG_FS_PCD_Init(void);
-static void MX_TIM3_Init(void);
+//static void MX_TIM3_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-int C4 = 262;
-int G4 = 392;
-int A4 = 440;
-int F4 = 350;
-int E4 = 330;
-int D4 = 294;
-int C4_arr = 3822;
-int G4_arr = 2551;
-int A4_arr = 2273;
-int F4_arr = 2863;
-int E4_arr = 3034;
-int D4_arr = 3405;
 
-static float get_freq_from_note(char note[]) {
-    char NOTES[12][2] = {"A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#"};
-    int octave;
-    char curr_note[2];
-    int note_len = strlen(note);
-    if (note_len == 3) {
-        octave = (int) note[2] - '0';
-        strncpy(curr_note, note, 2);
-    } else if (note_len == 2) {
-        octave = (int) note[1] - '0';
-        strncpy(curr_note, note, 1);
-    } else {
-        return 0;
-    }
-    int keyIndex = 0;
-    for (int i = 0; i < NUM_NOTES; i++) {
-        if (strncmp(curr_note, NOTES[i], 2) == 0) {
-            keyIndex = i;
-            break;
-        }
-    }
-    //@source: https://gist.github.com/stuartmemo/3766449#file-note-to-frequency
-    if (keyIndex < 3) {
-        keyIndex = keyIndex + 12 + ((octave - 1) * 12) + 1;
-    } else {
-        keyIndex = keyIndex + ((octave - 1) * 12) + 1;
-    }
-    // Return frequency of note
-    return 440 * pow(2, ((float) (keyIndex - 49)) / 12);
-}
-
-static void pause_pwm(int duration_in_ms) {
-    __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, 0);
-    HAL_Delay(duration_in_ms);
-}
-
-static void play_frequency(int num_beats, float freq, float beats_per_sec) {
-    int duration_ms = (num_beats/beats_per_sec)*1000;
-    if (freq == 0) {
-        pause_pwm(duration_ms);
-    } else {
-        int arr_val = (int) (CLOCKFREQ/freq);
-        //changing PWM frequency
-        __HAL_TIM_SET_AUTORELOAD(&htim3, arr_val);
-        __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, arr_val / 2);
-        //delaying so the note holds
-        HAL_Delay(duration_ms);
-        //small pause after note
-        pause_pwm((int) (50/(beats_per_sec)));
-    }
-}
-
-static void play_frequency_repeat(int duration, int freq, int num_repeats, int bps) {
-    for (int i = 0; i < num_repeats; i++) {
-        play_frequency(duration, freq, bps);
-    }
-}
-
-static void play_frequencies(int beats[], float frequencies[], int tempo, int song_len) {
-    //calls play_frequency on each individual duration and frequency from the arrays passed in.
-    float beats_per_sec = tempo/60;
-    for (int i = 0; i < song_len; i++) {
-        play_frequency(beats[i], frequencies[i], beats_per_sec);
-    }
-}
-
-static void play_tune(int beats[], char *song_notes, int tempo) {
-    //converts notes into frequencies, then calls play frequencies
-    int note_num = 0;
-    float freq_arr[100];
-    char *context = NULL;
-    char *space_split = strtok_r(song_notes, " ", &context);
-    while (space_split != NULL) {
-    	printf("%s", space_split);
-        freq_arr[note_num] = get_freq_from_note(space_split);
-        note_num += 1;
-        space_split = strtok_r(NULL, " ", &context);
-    }
-    play_frequencies(beats, freq_arr, tempo, note_num);
-}
 /* USER CODE END 0 */
 
 /**
@@ -224,229 +132,18 @@ int main(void)
   MX_USART1_UART_Init();
   MX_UCPD1_Init();
   MX_USB_OTG_FS_PCD_Init();
-  MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
-  HAL_TIM_Base_Start(&htim3);
-  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_3);
-  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_13, GPIO_PIN_SET);
+  piezo_init();
 
   int beat_dur[] = {1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 2};
-  float freqs[5] = {440, 500, 400, 500, 450};
-  //int beat_dur[] = {1, 1, 1, 1, 1};
-  //char notes[] = "G4 G4 D4 D4 E4";
-  char notess[] = "C4 C4 G4 G4 A4 A4 G4 F4 F4 E4 E4 D4 D4 C4 G4 G4 F4 F4 E4 E4 D4 G4 G4 F4 F4 E4 E4 D4 C4 C4 G4 G4 A4 A4 G4 F4 F4 E4 E4 D4 D4 C4 ";
+  char twinkle_twinkle_notes[] = "C4 C4 G4 G4 A4 A4 G4 F4 F4 E4 E4 D4 D4 C4 G4 G4 F4 F4 E4 E4 D4 G4 G4 F4 F4 E4 E4 D4 C4 C4 G4 G4 A4 A4 G4 F4 F4 E4 E4 D4 D4 C4 ";
   /* USER CODE END 2 */
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	play_tune(beat_dur, notess, 120);
+	play_tune(beat_dur, twinkle_twinkle_notes, 120);
 	break;
-
-	/*
-	//line 1
-	__HAL_TIM_SET_AUTORELOAD(&htim3, C4_arr);
-	__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, (int) C4_arr/2);
-	HAL_Delay(500);
-	pause_pwm(100);
-	__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, (int) C4_arr/2);
-	HAL_Delay(500);
-	pause_pwm(100);
-
-	__HAL_TIM_SET_AUTORELOAD(&htim3, G4_arr);
-	__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, (int) G4_arr/2);
-	HAL_Delay(500);
-	pause_pwm(100);
-	__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, (int) G4_arr/2);
-	HAL_Delay(500);
-	pause_pwm(100);
-
-	__HAL_TIM_SET_AUTORELOAD(&htim3, A4_arr);
-	__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, (int) A4_arr/2);
-	HAL_Delay(500);
-	pause_pwm(100);
-	__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, (int) A4_arr/2);
-	HAL_Delay(500);
-
-	pause_pwm(100);
-
-	__HAL_TIM_SET_AUTORELOAD(&htim3, G4_arr);
-	__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, (int) G4_arr/2);
-	HAL_Delay(1000);
-
-	pause_pwm(100);
-
-	//line 2
-	__HAL_TIM_SET_AUTORELOAD(&htim3, F4_arr);
-	__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, (int) F4_arr/2);
-	HAL_Delay(500);
-	pause_pwm(100);
-	__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, (int) F4_arr/2);
-	HAL_Delay(500);
-	pause_pwm(100);
-
-	__HAL_TIM_SET_AUTORELOAD(&htim3, E4_arr);
-	__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, (int) E4_arr/2);
-	HAL_Delay(500);
-	pause_pwm(100);
-	__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, (int) E4_arr/2);
-	HAL_Delay(500);
-	pause_pwm(100);
-
-	__HAL_TIM_SET_AUTORELOAD(&htim3, D4_arr);
-	__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, (int) D4_arr/2);
-	HAL_Delay(500);
-	pause_pwm(100);
-	__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, (int) D4_arr/2);
-	HAL_Delay(500);
-
-	pause_pwm(100);
-
-	__HAL_TIM_SET_AUTORELOAD(&htim3, C4_arr);
-	__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, (int) C4_arr/2);
-	HAL_Delay(1000);
-
-	pause_pwm(100);
-
-	//line 3
-	__HAL_TIM_SET_AUTORELOAD(&htim3, G4_arr);
-	__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, (int) G4_arr/2);
-	HAL_Delay(500);
-	pause_pwm(100);
-	__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, (int) G4_arr/2);
-	HAL_Delay(500);
-	pause_pwm(100);
-
-	__HAL_TIM_SET_AUTORELOAD(&htim3, F4_arr);
-	__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, (int) F4_arr/2);
-	HAL_Delay(500);
-	pause_pwm(100);
-	__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, (int) F4_arr/2);
-	HAL_Delay(500);
-	pause_pwm(100);
-
-	__HAL_TIM_SET_AUTORELOAD(&htim3, E4_arr);
-	__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, (int) E4_arr/2);
-	HAL_Delay(500);
-	pause_pwm(100);
-	__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, (int) E4_arr/2);
-	HAL_Delay(500);
-
-	pause_pwm(100);
-
-	__HAL_TIM_SET_AUTORELOAD(&htim3, D4_arr);
-	__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, (int) D4_arr/2);
-	HAL_Delay(1000);
-
-	pause_pwm(100);
-
-	//line 4
-	__HAL_TIM_SET_AUTORELOAD(&htim3, G4_arr);
-	__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, (int) G4_arr/2);
-	HAL_Delay(500);
-	pause_pwm(100);
-	__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, (int) G4_arr/2);
-	HAL_Delay(500);
-	pause_pwm(100);
-
-	__HAL_TIM_SET_AUTORELOAD(&htim3, F4_arr);
-	__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, (int) F4_arr/2);
-	HAL_Delay(500);
-	pause_pwm(100);
-	__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, (int) F4_arr/2);
-	HAL_Delay(500);
-	pause_pwm(100);
-
-	__HAL_TIM_SET_AUTORELOAD(&htim3, E4_arr);
-	__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, (int) E4_arr/2);
-	HAL_Delay(500);
-	pause_pwm(100);
-	__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, (int) E4_arr/2);
-	HAL_Delay(500);
-
-	pause_pwm(100);
-
-	__HAL_TIM_SET_AUTORELOAD(&htim3, D4_arr);
-	__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, (int) D4_arr/2);
-	HAL_Delay(1000);
-
-	pause_pwm(100);
-
-	//line 5
-	__HAL_TIM_SET_AUTORELOAD(&htim3, C4_arr);
-	__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, (int) C4_arr/2);
-	HAL_Delay(500);
-	pause_pwm(100);
-	__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, (int) C4_arr/2);
-	HAL_Delay(500);
-	pause_pwm(100);
-
-	__HAL_TIM_SET_AUTORELOAD(&htim3, G4_arr);
-	__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, (int) G4_arr/2);
-	HAL_Delay(500);
-	pause_pwm(100);
-	__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, (int) G4_arr/2);
-	HAL_Delay(500);
-	pause_pwm(100);
-
-	__HAL_TIM_SET_AUTORELOAD(&htim3, A4_arr);
-	__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, (int) A4_arr/2);
-	HAL_Delay(500);
-	pause_pwm(100);
-	__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, (int) A4_arr/2);
-	HAL_Delay(500);
-
-	pause_pwm(100);
-
-	__HAL_TIM_SET_AUTORELOAD(&htim3, G4_arr);
-	__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, (int) G4_arr/2);
-	HAL_Delay(1000);
-
-	pause_pwm(100);
-
-	//line 6
-	__HAL_TIM_SET_AUTORELOAD(&htim3, F4_arr);
-	__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, (int) F4_arr/2);
-	HAL_Delay(500);
-	pause_pwm(100);
-	__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, (int) F4_arr/2);
-	HAL_Delay(500);
-	pause_pwm(100);
-
-	__HAL_TIM_SET_AUTORELOAD(&htim3, E4_arr);
-	__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, (int) E4_arr/2);
-	HAL_Delay(500);
-	pause_pwm(100);
-	__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, (int) E4_arr/2);
-	HAL_Delay(500);
-	pause_pwm(100);
-
-	__HAL_TIM_SET_AUTORELOAD(&htim3, D4_arr);
-	__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, (int) D4_arr/2);
-	HAL_Delay(500);
-	pause_pwm(100);
-	__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, (int) D4_arr/2);
-	HAL_Delay(500);
-
-	pause_pwm(100);
-
-	__HAL_TIM_SET_AUTORELOAD(&htim3, C4_arr);
-	__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, (int) C4_arr/2);
-	HAL_Delay(1000);
-
-	pause_pwm(10000);
-	*/
-	/*
-	__HAL_TIM_SET_AUTORELOAD(&htim3, 2000);
-	__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, 1136);
-	HAL_Delay(1000);
-	__HAL_TIM_SET_AUTORELOAD(&htim3, 2500);
-	__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, 1250);
-	HAL_Delay(1000);
-	__HAL_TIM_SET_AUTORELOAD(&htim3, 3000);
-	__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, 1500);
-	HAL_Delay(1000);
-	*/
     /* USER CODE END WHILE */
   }
     /* USER CODE BEGIN 3 */
@@ -848,55 +545,6 @@ static void MX_SPI2_Init(void)
   /* USER CODE BEGIN SPI2_Init 2 */
 
   /* USER CODE END SPI2_Init 2 */
-
-}
-
-/**
-  * @brief TIM3 Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_TIM3_Init(void)
-{
-
-  /* USER CODE BEGIN TIM3_Init 0 */
-
-  /* USER CODE END TIM3_Init 0 */
-
-  TIM_MasterConfigTypeDef sMasterConfig = {0};
-  TIM_OC_InitTypeDef sConfigOC = {0};
-
-  /* USER CODE BEGIN TIM3_Init 1 */
-
-  /* USER CODE END TIM3_Init 1 */
-  htim3.Instance = TIM3;
-  htim3.Init.Prescaler = 64;
-  htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim3.Init.Period = 1000;
-  htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-  htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
-  if (HAL_TIM_PWM_Init(&htim3) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
-  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-  if (HAL_TIMEx_MasterConfigSynchronization(&htim3, &sMasterConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  sConfigOC.OCMode = TIM_OCMODE_PWM1;
-  sConfigOC.Pulse = 500;
-  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
-  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
-  if (HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_3) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN TIM3_Init 2 */
-
-  /* USER CODE END TIM3_Init 2 */
-  HAL_TIM_MspPostInit(&htim3);
 
 }
 

@@ -8,6 +8,7 @@
 #ifndef LUI_PIEZO_H_
 #define LUI_PIEZO_H_
 
+void piezo_init(void);
 float get_freq_from_note(char note[]);
 void pause_pwm(int duration_in_ms);
 void play_frequency(int note_beat_length, float frequency, float beats_per_sec);

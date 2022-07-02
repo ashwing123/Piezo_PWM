@@ -1,16 +1,79 @@
 /*
  * lui_piezo.c
  *
- *  Created on: Jul 1, 2022
+ *  Created on: Jul 2, 2022
  *      Author: gopala4
  */
+//include statements:
+#include "main.h"
+#include <stdint.h>
+#include <stdio.h>
+#include <string.h>
+#include <math.h>
+
+//definitions
+#define CLOCKFREQ 1000000
+#define NUM_NOTES 12
+
+
+
+
+TIM_HandleTypeDef htim3;
+//TIM3 initialization function
+void MX_TIM3_Init(void)
+{
+
+  /* USER CODE BEGIN TIM3_Init 0 */
+
+  /* USER CODE END TIM3_Init 0 */
+
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+  TIM_OC_InitTypeDef sConfigOC = {0};
+
+  /* USER CODE BEGIN TIM3_Init 1 */
+
+  /* USER CODE END TIM3_Init 1 */
+  htim3.Instance = TIM3;
+  htim3.Init.Prescaler = 64;
+  htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim3.Init.Period = 1000;
+  htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
+  if (HAL_TIM_PWM_Init(&htim3) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim3, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sConfigOC.OCMode = TIM_OCMODE_PWM1;
+  sConfigOC.Pulse = 500;
+  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+  if (HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_3) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM3_Init 2 */
+
+  /* USER CODE END TIM3_Init 2 */
+  HAL_TIM_MspPostInit(&htim3);
+
+}
+
+void piezo_init(void) {
+	MX_TIM3_Init();
+	HAL_TIM_Base_Start(&htim3);
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_13, GPIO_PIN_SET);
+}
 /*
  * function name: get_freq_from_note
  * purpose: convert a string representing a note & octave to its corresponding frequency
  * input: string representing a note (see NOTES array below for possible notes) followed by an octave (ex A#3).
  */
-static void MX_TIM3_Init(void);
-
 float get_freq_from_note(char note[]) {
 	char NOTES[12][2] = {"A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#"};
 	int octave;
@@ -57,16 +120,16 @@ void pause_pwm(int duration_in_ms) {
  * input: the beat length, the frequency, the beats per second (tempo)
  */
 void play_frequency(int note_beat_length, float frequency, float beats_per_sec) {
-	int note_duration_ms = (num_beats/beats_per_sec)*1000;
-	if (freq == 0) {
-		pause_pwm(duration_ms);
+	int note_duration_ms = (note_beat_length/beats_per_sec)*1000;
+	if (frequency == 0) {
+		pause_pwm(note_duration_ms);
 	} else {
-		int arr_val = (int) (CLOCKFREQ/freq);
+		int arr_val = (int) (CLOCKFREQ/frequency);
 		//changing PWM frequency
 		__HAL_TIM_SET_AUTORELOAD(&htim3, arr_val);
 		__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, arr_val / 2);
 		//delaying so the note holds
-		HAL_Delay(duration_ms);
+		HAL_Delay(note_duration_ms);
 		//small pause after note
 		pause_pwm((int) (50/(beats_per_sec)));
 	}
@@ -89,6 +152,8 @@ void play_tune(int beats[], char *song_notes, int tempo) {
 		note_num += 1;
 		space_split = strtok_r(NULL, " ", &context);
 	}
-	play_frequencies(beats, freq_arr, tempo, note_num);
+	piezo_init();
+	HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_3);
+	play_frequency_array(beats, freq_arr, tempo, note_num);
 }
 
