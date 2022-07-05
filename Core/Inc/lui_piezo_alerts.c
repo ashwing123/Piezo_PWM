@@ -13,6 +13,7 @@
  */
 
 void play_frequency_repeat(int duration, float freq, int num_repeats, int pause_duration) {
+	pause_pwm(100);
 	for (int i = 0; i < num_repeats; i++) {
 		play_frequency(duration, freq);
 		if (pause_duration != 0) {
@@ -36,6 +37,7 @@ void play_freqs_no_pause(float beats[], float frequencies[], int tempo, int song
 void play_ascending(float start_freq, float end_freq, int pulse_duration, int pause_duration, int num_steps) {
 	float init_freq = start_freq;
 	float step = (end_freq - start_freq) / num_steps;
+	pause_pwm(100);
 	for (int i = 0; i < num_steps; i++) {
 		play_frequency(pulse_duration, init_freq);
 		if (pause_duration != 0) {
@@ -53,6 +55,7 @@ void play_ascending(float start_freq, float end_freq, int pulse_duration, int pa
 void play_descending(float start_freq, float end_freq, int pulse_duration, int pause_duration, int num_steps) {
 	float init_freq = start_freq;
 	float step = (start_freq - end_freq) / num_steps;
+	pause_pwm(100);
 	for (int i = 0; i < num_steps; i++) {
 		play_frequency(pulse_duration, init_freq);
 		if (pause_duration != 0) {

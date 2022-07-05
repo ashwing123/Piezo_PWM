@@ -128,7 +128,7 @@ void play_frequency(int duration_ms, float frequency) {
 		int arr_val = (int) (CLOCKFREQ/frequency);
 		//changing PWM frequency
 		__HAL_TIM_SET_AUTORELOAD(&htim3, arr_val);
-		__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, arr_val / 2);
+		__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, arr_val / 3);
 		//delaying so the note holds
 		HAL_Delay(duration_ms);
 	}
@@ -140,6 +140,7 @@ void play_frequency(int duration_ms, float frequency) {
  */
 void play_frequency_array(float beats[], float frequencies[], int tempo, int song_len) {
 	float beats_per_sec = tempo/60;
+	pause_pwm(100);
 	for (int i = 0; i < song_len; i++) {
 		int duration_ms = (int) ((beats[i]/beats_per_sec)*1000);
 		play_frequency(duration_ms, frequencies[i]);
@@ -165,7 +166,7 @@ void play_tune(float beats[], char *song_notes, int tempo) {
 	play_frequency_array(beats, freq_arr, tempo, note_num);
 }
 
-//stops pwm signal by seeting duty cycle to 0
+//stops pwm signal by setting duty cycle to 0
 void stop_pwm(void) {
 	__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, 0);
 }

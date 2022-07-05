@@ -135,8 +135,8 @@ int main(void)
   MX_USB_OTG_FS_PCD_Init();
   /* USER CODE BEGIN 2 */
 
-  //int beat_dur[] = {1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 2};
-  //char twinkle_twinkle_notes[] = "C4 C4 G4 G4 A4 A4 G4 F4 F4 E4 E4 D4 D4 C4 G4 G4 F4 F4 E4 E4 D4 G4 G4 F4 F4 E4 E4 D4 C4 C4 G4 G4 A4 A4 G4 F4 F4 E4 E4 D4 D4 C4 ";
+  float twinkle_twinkle_beats[] = {1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 2};
+  char twinkle_twinkle_notes[] = "C4 C4 G4 G4 A4 A4 G4 F4 F4 E4 E4 D4 D4 C4 G4 G4 F4 F4 E4 E4 D4 G4 G4 F4 F4 E4 E4 D4 C4 C4 G4 G4 A4 A4 G4 F4 F4 E4 E4 D4 D4 C4 ";
   char xfiles_notes[] = "A3 C4 E4 F4 0 A4 E4 D4 E4 G4 E4";
   float xfiles_beats[] = {0.5, 0.5, 0.5, 1, 1, 1, 1, 1, 1, 1, 2};
   //float ascending_frqs[] = {350, 375, 400, 425, 450};
@@ -147,8 +147,11 @@ int main(void)
   while (1)
   {
 	piezo_init();
-	play_descending(500, 300, 200, 0, 5);
-	//play_tune(xfiles_beats, xfiles_notes, 120);
+	//play_frequency_repeat(500, 300, 4, 100);
+	//play_ascending(300, 500, 500, 0, 5);
+	//play_descending(500, 300, 500, 0, 5);
+
+	play_tune(twinkle_twinkle_beats, twinkle_twinkle_notes, 120);
 	break;
     /* USER CODE END WHILE */
   }
