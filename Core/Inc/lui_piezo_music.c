@@ -66,6 +66,7 @@ void piezo_init(void) {
 	MX_TIM3_Init();
 	HAL_TIM_Base_Start(&htim3);
 	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_13, GPIO_PIN_SET);
+	HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_3);
 }
 /*
  * function name: get_freq_from_note
@@ -77,6 +78,7 @@ float get_freq_from_note(char note[]) {
 	int octave;
 	char curr_note[2];
 	int note_len = strlen(note);
+	//extracting the octave number from the char that was passed in
 	if (note_len == 3) {
 		octave = (int) note[2] - '0';
 		strncpy(curr_note, note, 2);
@@ -86,6 +88,7 @@ float get_freq_from_note(char note[]) {
 	} else {
 		return 0;
 	}
+	//extracting the index (as per the NOTES array above) of the note passed in
 	int keyIndex = 0;
 	for (int i = 0; i < NUM_NOTES; i++) {
 		if (strncmp(curr_note, NOTES[i], 2) == 0) {
@@ -94,6 +97,7 @@ float get_freq_from_note(char note[]) {
 		}
 	}
 	//@source: https://gist.github.com/stuartmemo/3766449#file-note-to-frequency
+	//math to calculate the frequency from the note index
 	if (keyIndex < 3) {
 		keyIndex = keyIndex + 12 + ((octave - 1) * 12) + 1;
 	} else {
@@ -117,17 +121,16 @@ void pause_pwm(int duration_in_ms) {
  * purpose: plays a frequency, for a duration that corresponds to the beat and the tempo
  * input: the beat length, the frequency, the beats per second (tempo)
  */
-void play_frequency(float note_beat_length, float frequency, float beats_per_sec) {
-	int note_duration_ms = (note_beat_length/beats_per_sec)*1000;
+void play_frequency(int duration_ms, float frequency) {
 	if (frequency == 0) {
-		pause_pwm(note_duration_ms);
+		pause_pwm(duration_ms);
 	} else {
 		int arr_val = (int) (CLOCKFREQ/frequency);
 		//changing PWM frequency
 		__HAL_TIM_SET_AUTORELOAD(&htim3, arr_val);
 		__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, arr_val / 2);
 		//delaying so the note holds
-		HAL_Delay(note_duration_ms);
+		HAL_Delay(duration_ms);
 	}
 }
 /*
@@ -138,7 +141,8 @@ void play_frequency(float note_beat_length, float frequency, float beats_per_sec
 void play_frequency_array(float beats[], float frequencies[], int tempo, int song_len) {
 	float beats_per_sec = tempo/60;
 	for (int i = 0; i < song_len; i++) {
-		play_frequency(beats[i], frequencies[i], beats_per_sec);
+		int duration_ms = (int) ((beats[i]/beats_per_sec)*1000);
+		play_frequency(duration_ms, frequencies[i]);
 		pause_pwm((int) (50/(beats_per_sec)));
 	}
 }
@@ -154,13 +158,10 @@ void play_tune(float beats[], char *song_notes, int tempo) {
 	char *context = NULL;
 	char *space_split = strtok_r(song_notes, " ", &context);
 	while (space_split != NULL) {
-		printf("%s", space_split);
 		freq_arr[note_num] = get_freq_from_note(space_split);
 		note_num += 1;
 		space_split = strtok_r(NULL, " ", &context);
 	}
-	piezo_init();
-	HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_3);
 	play_frequency_array(beats, freq_arr, tempo, note_num);
 }
 

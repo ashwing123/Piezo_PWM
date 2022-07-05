@@ -5,13 +5,16 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
-../Core/Inc/lui_piezo.c 
+../Core/Inc/lui_piezo_alerts.c \
+../Core/Inc/lui_piezo_music.c 
 
 OBJS += \
-./Core/Inc/lui_piezo.o 
+./Core/Inc/lui_piezo_alerts.o \
+./Core/Inc/lui_piezo_music.o 
 
 C_DEPS += \
-./Core/Inc/lui_piezo.d 
+./Core/Inc/lui_piezo_alerts.d \
+./Core/Inc/lui_piezo_music.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes
@@ -21,7 +24,7 @@ Core/Inc/%.o Core/Inc/%.su: ../Core/Inc/%.c Core/Inc/subdir.mk
 clean: clean-Core-2f-Inc
 
 clean-Core-2f-Inc:
-	-$(RM) ./Core/Inc/lui_piezo.d ./Core/Inc/lui_piezo.o ./Core/Inc/lui_piezo.su
+	-$(RM) ./Core/Inc/lui_piezo_alerts.d ./Core/Inc/lui_piezo_alerts.o ./Core/Inc/lui_piezo_alerts.su ./Core/Inc/lui_piezo_music.d ./Core/Inc/lui_piezo_music.o ./Core/Inc/lui_piezo_music.su
 
 .PHONY: clean-Core-2f-Inc
 

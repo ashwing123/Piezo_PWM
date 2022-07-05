@@ -1,5 +1,5 @@
-Core/Inc/lui_piezo.o: ../Core/Inc/lui_piezo.c ../Core/Inc/main.h \
- ../Drivers/STM32U5xx_HAL_Driver/Inc/stm32u5xx_hal.h \
+Core/Inc/lui_piezo_music.o: ../Core/Inc/lui_piezo_music.c \
+ ../Core/Inc/main.h ../Drivers/STM32U5xx_HAL_Driver/Inc/stm32u5xx_hal.h \
  ../Core/Inc/stm32u5xx_hal_conf.h \
  ../Drivers/STM32U5xx_HAL_Driver/Inc/stm32u5xx_hal_rcc.h \
  ../Drivers/STM32U5xx_HAL_Driver/Inc/stm32u5xx_hal_def.h \

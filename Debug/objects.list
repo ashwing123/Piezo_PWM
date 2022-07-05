@@ -1,4 +1,5 @@
-"./Core/Inc/lui_piezo.o"
+"./Core/Inc/lui_piezo_alerts.o"
+"./Core/Inc/lui_piezo_music.o"
 "./Core/Src/main.o"
 "./Core/Src/stm32u5xx_hal_msp.o"
 "./Core/Src/stm32u5xx_it.o"
