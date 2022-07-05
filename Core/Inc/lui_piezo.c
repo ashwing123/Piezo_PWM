@@ -16,8 +16,6 @@
 #define NUM_NOTES 12
 
 
-
-
 TIM_HandleTypeDef htim3;
 //TIM3 initialization function
 void MX_TIM3_Init(void)
@@ -132,6 +130,11 @@ void play_frequency(float note_beat_length, float frequency, float beats_per_sec
 		HAL_Delay(note_duration_ms);
 	}
 }
+/*
+ * function name: play_frequency_array
+ * purpose: plays an array of frequency, for a duration derived from the beats and tempo
+ * input: length of beats, array of frequencies, tempo, number of notes in the song
+ */
 void play_frequency_array(float beats[], float frequencies[], int tempo, int song_len) {
 	float beats_per_sec = tempo/60;
 	for (int i = 0; i < song_len; i++) {
@@ -139,6 +142,11 @@ void play_frequency_array(float beats[], float frequencies[], int tempo, int son
 		pause_pwm((int) (50/(beats_per_sec)));
 	}
 }
+
+/* function name: play_tune
+ * purpose: plays a song based on the notes specified and the beats specified
+ * input: array of beat-lengths, string of song notes, tempo.
+ */
 
 void play_tune(float beats[], char *song_notes, int tempo) {
 	int note_num = 0;
@@ -156,9 +164,11 @@ void play_tune(float beats[], char *song_notes, int tempo) {
 	play_frequency_array(beats, freq_arr, tempo, note_num);
 }
 
+//stops pwm signal by seeting duty cycle to 0
 void stop_pwm(void) {
 	__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, 0);
 }
+/*
 void play_freqs_no_pause(float beats[], float frequencies[], int tempo, int song_len) {
 	piezo_init();
 	HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_3);
@@ -169,4 +179,4 @@ void play_freqs_no_pause(float beats[], float frequencies[], int tempo, int song
 	stop_pwm();
 
 }
-
+*/

@@ -146,8 +146,8 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	//play_tune(xfiles_beats, xfiles_notes, 120);
-	play_freqs_no_pause(beat_duration, ascending_frqs, 120, 5);
+	play_tune(xfiles_beats, xfiles_notes, 120);
+	//play_freqs_no_pause(beat_duration, ascending_frqs, 120, 5);
 	break;
     /* USER CODE END WHILE */
   }
