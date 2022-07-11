@@ -125,10 +125,10 @@ void play_frequency(int duration_ms, float frequency) {
 	if (frequency == 0) {
 		pause_pwm(duration_ms);
 	} else {
-		int arr_val = (int) (CLOCKFREQ/frequency);
+		int arr_val = (CLOCKFREQ/frequency);
 		//changing PWM frequency
 		__HAL_TIM_SET_AUTORELOAD(&htim3, arr_val);
-		__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, arr_val / 3);
+		__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, arr_val / 2);
 		//delaying so the note holds
 		HAL_Delay(duration_ms);
 	}
@@ -138,13 +138,13 @@ void play_frequency(int duration_ms, float frequency) {
  * purpose: plays an array of frequency, for a duration derived from the beats and tempo
  * input: length of beats, array of frequencies, tempo, number of notes in the song
  */
-void play_frequency_array(float beats[], float frequencies[], int tempo, int song_len) {
+void play_frequency_array(float beats[], float frequencies[], float tempo, int song_len) {
 	float beats_per_sec = tempo/60;
 	pause_pwm(100);
 	for (int i = 0; i < song_len; i++) {
-		int duration_ms = (int) ((beats[i]/beats_per_sec)*1000);
+		int duration_ms = round((beats[i]/beats_per_sec)*1000);
 		play_frequency(duration_ms, frequencies[i]);
-		pause_pwm((int) (50/(beats_per_sec)));
+		pause_pwm(round(50/(beats_per_sec)));
 	}
 }
 
@@ -153,9 +153,9 @@ void play_frequency_array(float beats[], float frequencies[], int tempo, int son
  * input: array of beat-lengths, string of song notes, tempo.
  */
 
-void play_tune(float beats[], char *song_notes, int tempo) {
+void play_tune(float beats[], char *song_notes, float tempo) {
 	int note_num = 0;
-	float freq_arr[100];
+	float freq_arr[250];
 	char *context = NULL;
 	char *space_split = strtok_r(song_notes, " ", &context);
 	while (space_split != NULL) {

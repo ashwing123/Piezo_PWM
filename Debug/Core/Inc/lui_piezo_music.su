@@ -4,5 +4,5 @@
 ../Core/Inc/lui_piezo_music.c:115:6:pause_pwm	16	static
 ../Core/Inc/lui_piezo_music.c:124:6:play_frequency	24	static
 ../Core/Inc/lui_piezo_music.c:141:6:play_frequency_array	40	static
-../Core/Inc/lui_piezo_music.c:156:6:play_tune	440	static
+../Core/Inc/lui_piezo_music.c:156:6:play_tune	1040	static
 ../Core/Inc/lui_piezo_music.c:170:6:stop_pwm	4	static
